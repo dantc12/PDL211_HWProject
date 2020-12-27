@@ -1,24 +1,37 @@
+from typing import Callable
+
 from data import test_data
 import numpy as np
 
-# Creating the Feed forward neural network
-def f_forward(X: np.ndarray, W: np.ndarray) -> np.ndarray:
-    """
-    Feed forward
-    :param X: Input from previous layer (neurons)
-    :param W: The weights of the layer
-    :return:
-    """
-    return act_function(X.dot(W))
 
+class NNLayer:
+    k1: int
+    k2: int
+    l: int
+    W: np.ndarray  # k1 x k2
+    b: np.ndarray  # k2 x 1
+    act_func: Callable[[float], float]
 
-# initializing the weights randomly
-def generate_wt(x: int, y: int) -> np.ndarray:
-    l = []
-    for i in range(x * y):
-        l.append(np.random.randn())
-    return np.array(l).reshape(x, y)
-#
+    def __init__(self, l: int, W: np.ndarray, b: np.ndarray, act_func: Callable[[float], float]):
+        if not NNLayer._check_valid(W, b):
+            raise Exception('Tried to created layer with bad weights and/or bias dimensions')
+        self.k1, self.k2 = W.shape
+        self.l = l
+
+        self.W = W
+        self.b = b
+        self.act_func = act_func
+
+    @staticmethod
+    def _check_valid(W: np.ndarray, b: np.ndarray) -> bool:
+        try:
+            return W.shape[1] == b.shape[0]
+        except IndexError:
+            return False
+
+    def x_output(self, x_input: np.ndarray):
+        return np.array([x_input.dot(self.W[:, j]) + self.b[j] for j in range(self.k2)])
+
 #
 # # for loss we will be using mean square error(MSE)
 # def loss(out, Y):
