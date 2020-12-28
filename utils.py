@@ -1,6 +1,5 @@
 import numpy as np
 
-from SampleSet import SampleSet
 
 
 # def sigmoid(x: np.ndarray) -> np.ndarray:
