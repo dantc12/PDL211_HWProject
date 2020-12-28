@@ -1,50 +1,50 @@
+from typing import Callable
+
 import numpy as np
 
-from utils import softmax_vector, softmax_cross_entropy_loss
+from NNLayer import NNLayer
 
 
-class SoftMax:
-    n_labels: int
-    m: int
-    X: np.ndarray  # n x m
-    Y: np.ndarray  # n_labels x m , each column looks like [0, ..., 1, ..., 0]^T
+class NNOutputLayer(NNLayer):
+    output_func: Callable[[np.ndarray], np.ndarray]  # output function
+    loss_func: Callable[[np.ndarray, np.ndarray], float]  # the loss function (on single sample)
+    loss: float  # the loss for safe-keeping (on single sample)
 
-    def __init__(self, X: np.ndarray, Y: np.ndarray):
-        self.n_labels = Y.shape[0]
-        self.m = self.Y.shape[1]
-        self.X = X
-        self.Y = Y
+    def __init__(self, l: int, k1: int, k2: int, output_func: Callable[[np.ndarray], np.ndarray],
+                 loss_func: Callable[[np.ndarray, np.ndarray], float]):
+        self.output_func = output_func
+        self.loss_func = loss_func
+        super().__init__(l, k1, k2)
 
-    def objective_loss(self, W: np.ndarray, b: np.ndarray) -> float:
-        """
-        :param W: n x n_labels
-        :param b: n_labels x 1 (but 1-D array)
-        """
-        objective_loss = 0
-        for i in range(self.m):
-            label = self.Y[:, i].to_list().index(1)
-            objective_loss += softmax_cross_entropy_loss(self.X[:, i].dot(W[:, label]) + b[label], label)
-        return objective_loss / self.m
+    def output(self, x_input: np.ndarray) -> np.ndarray:
+        self.layer_output = self.output_func(x_input.dot(self.W) + self.b)
+        return self.layer_output
 
-    def _exp_X_T_W_j_plus_bias(self, W: np.ndarray, b: np.ndarray, j: int) -> float:
-        """
-        :param W: n x n_labels
-        :param b: n_labels x 1 (but 1-D array)
-        :param j: int
-        """
-        #  X.T: m x n
-        #  W[:, j]: n x 1 (but 1-D array)
-        #  => X.T.dot(W[:, j]): m x 1 (but 1-D array)
-        #  => X.T.dot(W[:, j]): m x 1 (but 1-D array)
-        return np.exp(self.X.T.dot(W[:, j]) + np.ones(self.m) * b[j])  # m x 1 (but 1-D array)
+    def calc_loss(self, true_y_output: np.ndarray) -> float:
+        if not self.layer_output:
+            raise Exception('Tried to call loss function before calculated output')
+        self.loss = self.loss_func(self.layer_output, true_y_output)
+        return self.loss
 
-    def grad_w_j(self, W: np.ndarray, b: np.ndarray, j: int) -> np.ndarray:
-        """
-        :param W: n x n_labels
-        :param b: n_labels x 1 (but 1-D array)
-        :param j: int
-        """
-        c_j = self.Y[j, :]  # m x 1 (but 1-D array)
-        return (1 / self.m) * self.X.dot(
-            (self._exp_X_T_W_j_plus_bias(W, b, j) /
-             (np.sum([self._exp_X_T_W_j_plus_bias(W, b, k) for k in range(self.n_labels)]))) - c_j.T)  # n x 1
+    # def _exp_X_T_W_j_plus_bias(self, W: np.ndarray, b: np.ndarray, j: int) -> float:
+    #     """
+    #     :param W: n x n_labels
+    #     :param b: n_labels x 1 (but 1-D array)
+    #     :param j: int
+    #     """
+    #     #  X.T: m x n
+    #     #  W[:, j]: n x 1 (but 1-D array)
+    #     #  => X.T.dot(W[:, j]): m x 1 (but 1-D array)
+    #     #  => X.T.dot(W[:, j]): m x 1 (but 1-D array)
+    #     return np.exp(self.X.T.dot(W[:, j]) + np.ones(self.m) * b[j])  # m x 1 (but 1-D array)
+    #
+    # def grad_w_j(self, W: np.ndarray, b: np.ndarray, j: int) -> np.ndarray:
+    #     """
+    #     :param W: n x n_labels
+    #     :param b: n_labels x 1 (but 1-D array)
+    #     :param j: int
+    #     """
+    #     c_j = self.Y[j, :]  # m x 1 (but 1-D array)
+    #     return (1 / self.m) * self.X.dot(
+    #         (self._exp_X_T_W_j_plus_bias(W, b, j) /
+    #          (np.sum([self._exp_X_T_W_j_plus_bias(W, b, k) for k in range(self.n_labels)]))) - c_j.T)  # n x 1

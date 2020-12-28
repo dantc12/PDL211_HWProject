@@ -5,32 +5,31 @@ import numpy as np
 
 
 class NNLayer:
-    k1: int
-    k2: int
-    l: int
-    W: np.ndarray  # k1 x k2
-    b: np.ndarray  # k2 x 1
-    act_func: Callable[[float], float]
+    k1: int  # input dimension
+    k2: int  # output dimension
+    l: int  # index number of the layer
+    W: np.ndarray  # weights: dimension k1 x k2
+    b: np.ndarray  # bias: dimension k2 x 1
+    layer_output: np.ndarray  # output saving for safe-keeping
 
-    def __init__(self, l: int, W: np.ndarray, b: np.ndarray, act_func: Callable[[float], float]):
-        if not NNLayer._check_valid(W, b):
-            raise Exception('Tried to created layer with bad weights and/or bias dimensions')
-        self.k1, self.k2 = W.shape
+    def __init__(self, l: int, k1: int, k2: int):
+        self.W = np.random.randn(k1, k2)
+        self.b = np.random.randn(k2, 1)
+        if not NNLayer._is_valid(self.W, self.b):
+            raise Exception('Tried to create layer with bad weights and/or bias dimensions')
+        self.k1, self.k2 = self.W.shape
         self.l = l
 
-        self.W = W
-        self.b = b
-        self.act_func = act_func
-
     @staticmethod
-    def _check_valid(W: np.ndarray, b: np.ndarray) -> bool:
+    def _is_valid(W: np.ndarray, b: np.ndarray) -> bool:
         try:
             return W.shape[1] == b.shape[0]
         except IndexError:
             return False
 
-    def x_output(self, x_input: np.ndarray):
-        return np.array([x_input.dot(self.W[:, j]) + self.b[j] for j in range(self.k2)])
+    def output(self, x_input: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
+
 
 #
 # # for loss we will be using mean square error(MSE)
@@ -98,14 +97,14 @@ class NNLayer:
 #     plt.show()
 
 
-if __name__ == '__main__':
-    W1 = generate_wt(30, 5)
-    w2 = generate_wt(5, 3)
-    # print(w1, "\n\n", w2)
-    print('W1 shape: {}'.format(str(W1.shape)))
-    print('input x shape: {}'.format(str(test_data.X.shape)))
-    xx = f_forward(test_data.X, W1)
-    print('feed forward x: {}'.format(str(xx)))
-    print('feed forward x shape: {}'.format(str(xx.shape)))
-    xx_softmax = normalize_vector(xx)
-    print('normalized: {}'.format(str(xx_softmax)))
+# if __name__ == '__main__':
+#     W1 = generate_wt(30, 5)
+#     w2 = generate_wt(5, 3)
+#     # print(w1, "\n\n", w2)
+#     print('W1 shape: {}'.format(str(W1.shape)))
+#     print('input x shape: {}'.format(str(test_data.X.shape)))
+#     xx = f_forward(test_data.X, W1)
+#     print('feed forward x: {}'.format(str(xx)))
+#     print('feed forward x shape: {}'.format(str(xx.shape)))
+#     xx_softmax = normalize_vector(xx)
+#     print('normalized: {}'.format(str(xx_softmax)))
