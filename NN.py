@@ -5,19 +5,20 @@ import numpy as np
 from NNHiddenLayer import NNHiddenLayer
 from NNLayer import NNLayer
 from NNOutputLayer import NNOutputLayer
-from utils import relu, softmax_vector, cross_entropy_loss
+from utils import relu, softmax_vector, cross_entropy_loss_with_grad
 
 
 class NN:
     layers = List[NNLayer]  # the layers of the network
     act_func: Callable[[np.ndarray], np.ndarray]  # activation function
     output_func: Callable[[np.ndarray], np.ndarray]  # output function
-    loss_func: Callable[[np.ndarray, np.ndarray], float]  # the loss function (for a single sample)
+    loss_func_with_grad: Callable[[np.ndarray, np.ndarray], Tuple[float, np.ndarray]]  # the loss function (for a
+    # single sample) with it's gradient
     output_layer: NNOutputLayer
 
     def __init__(self, neurons_counts: List[int], act_func: Callable[[np.ndarray], np.ndarray] = relu,
                  output_func: Callable[[np.ndarray], np.ndarray] = softmax_vector,
-                 loss_func: Callable[[np.ndarray, np.ndarray], float] = cross_entropy_loss):
+                 loss_func_with_grad: Callable[[np.ndarray, np.ndarray], Tuple[float, np.ndarray]] = cross_entropy_loss_with_grad):
         self.layers: List[NNLayer] = []
 
         # hidden layers
@@ -30,12 +31,12 @@ class NN:
         i = len(neurons_counts) - 2
         k1 = neurons_counts[i]
         k2 = neurons_counts[i + 1]
-        self.output_layer = NNOutputLayer(i + 1, k1, k2, output_func, loss_func)
+        self.output_layer = NNOutputLayer(i + 1, k1, k2, output_func, loss_func_with_grad)
         self.layers.append(self.output_layer)
 
         self.act_func = act_func
         self.output_func = output_func
-        self.loss_func = loss_func
+        self.loss_func = loss_func_with_grad
 
     def feed_forward(self, x_input: np.ndarray) -> np.ndarray:
         """
@@ -52,10 +53,11 @@ class NN:
         """
         m = X_input.shape[1]
         loss = 0
+        # grad = ?  TODO Continue here, what is the gradient?
         for i in range(m):
             _ = self.feed_forward(X_input[:, i])
             y = Y_input[:, i]
-            loss += self.output_layer.calc_loss(y)
+            loss += self.output_layer.calc_loss_and_grad(y)
         return loss / m
 
     # def objective_loss(self):

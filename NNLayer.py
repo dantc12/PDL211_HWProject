@@ -11,6 +11,7 @@ class NNLayer:
     W: np.ndarray  # weights: dimension k1 x k2
     b: np.ndarray  # bias: dimension k2 x 1
     layer_output: np.ndarray  # output saving for safe-keeping
+    grad: np.ndarray  # the gradient for safe-keeping (on single sample)
 
     def __init__(self, l: int, k1: int, k2: int):
         self.W = np.random.randn(k1, k2)

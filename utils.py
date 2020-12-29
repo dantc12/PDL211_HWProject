@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 
@@ -42,9 +44,16 @@ def softmax_vector(x: np.ndarray) -> np.ndarray:
 #     return - np.log(softmax_p_y_safely(output_vector, y_label))
 
 
-def cross_entropy_loss(prediction_vector: np.ndarray, true_y_vector: np.ndarray) -> float:
+def cross_entropy_loss_with_grad(prediction_vector: np.ndarray, true_y_vector: np.ndarray) -> Tuple[float, np.ndarray]:
+    """
+    The cross entropy loss on a single sample.
+    The grad got by reading about gradient of cross entropy loss with softmax.
+    :param prediction_vector: Assumed to be the softmax vector
+    :param true_y_vector: Assumed to be a classification vector of the type: [0, ..., 1, ..., 0]^T
+    :return: the value of the loss and the gradient w.r.t the prediction vector
+    """
     true_label = true_y_vector.tolist().index(1)
-    return -np.log(prediction_vector[true_label])
+    return -np.log(prediction_vector[true_label]), prediction_vector - true_y_vector
 
 
 # def loss_on_data_samples(S: SampleSet, output_vector: np.ndarray) -> float:
