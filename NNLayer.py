@@ -1,24 +1,37 @@
+from typing import Callable
+
 from data import test_data
 import numpy as np
 
-# Creating the Feed forward neural network
-def f_forward(X: np.ndarray, W: np.ndarray) -> np.ndarray:
-    """
-    Feed forward
-    :param X: Input from previous layer (neurons)
-    :param W: The weights of the layer
-    :return:
-    """
-    return act_function(X.dot(W))
+
+class NNLayer:
+    k1: int  # input dimension
+    k2: int  # output dimension
+    l: int  # index number of the layer
+    W: np.ndarray  # weights: dimension k1 x k2
+    b: np.ndarray  # bias: dimension k2 x 1
+    layer_output: np.ndarray  # output saving for safe-keeping
+    grad: np.ndarray  # the gradient for safe-keeping (on single sample)
+
+    def __init__(self, l: int, k1: int, k2: int):
+        self.W = np.random.randn(k1, k2)
+        self.b = np.random.randn(k2, 1)
+        if not NNLayer._is_valid(self.W, self.b):
+            raise Exception('Tried to create layer with bad weights and/or bias dimensions')
+        self.k1, self.k2 = self.W.shape
+        self.l = l
+
+    @staticmethod
+    def _is_valid(W: np.ndarray, b: np.ndarray) -> bool:
+        try:
+            return W.shape[1] == b.shape[0]
+        except IndexError:
+            return False
+
+    def output(self, x_input: np.ndarray) -> np.ndarray:
+        raise NotImplementedError
 
 
-# initializing the weights randomly
-def generate_wt(x: int, y: int) -> np.ndarray:
-    l = []
-    for i in range(x * y):
-        l.append(np.random.randn())
-    return np.array(l).reshape(x, y)
-#
 #
 # # for loss we will be using mean square error(MSE)
 # def loss(out, Y):
@@ -85,14 +98,14 @@ def generate_wt(x: int, y: int) -> np.ndarray:
 #     plt.show()
 
 
-if __name__ == '__main__':
-    W1 = generate_wt(30, 5)
-    w2 = generate_wt(5, 3)
-    # print(w1, "\n\n", w2)
-    print('W1 shape: {}'.format(str(W1.shape)))
-    print('input x shape: {}'.format(str(test_data.X.shape)))
-    xx = f_forward(test_data.X, W1)
-    print('feed forward x: {}'.format(str(xx)))
-    print('feed forward x shape: {}'.format(str(xx.shape)))
-    xx_softmax = normalize_vector(xx)
-    print('normalized: {}'.format(str(xx_softmax)))
+# if __name__ == '__main__':
+#     W1 = generate_wt(30, 5)
+#     w2 = generate_wt(5, 3)
+#     # print(w1, "\n\n", w2)
+#     print('W1 shape: {}'.format(str(W1.shape)))
+#     print('input x shape: {}'.format(str(test_data.X.shape)))
+#     xx = f_forward(test_data.X, W1)
+#     print('feed forward x: {}'.format(str(xx)))
+#     print('feed forward x shape: {}'.format(str(xx.shape)))
+#     xx_softmax = normalize_vector(xx)
+#     print('normalized: {}'.format(str(xx_softmax)))
