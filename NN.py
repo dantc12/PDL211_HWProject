@@ -38,19 +38,25 @@ class NN:
         self.loss_func = loss_func
 
     def feed_forward(self, x_input: np.ndarray) -> np.ndarray:
+        """
+        Gets an input x, and returns the networks output
+        """
         x = x_input
         for layer in self.layers:
             x = layer.output(x)
         return x
 
-    def forward_prop(self, X_input: np.ndarray, Y_input: np.ndarray) -> Tuple[np.ndarray, float]:
+    def objective_loss(self, X_input: np.ndarray, Y_input: np.ndarray) -> float:
+        """
+        Gets a sample set {(x_i,y_i)} and returns the loss the network gets on it.
+        """
         m = X_input.shape[1]
         loss = 0
         for i in range(m):
-            y_hat = self.feed_forward(X_input[:, i])
+            _ = self.feed_forward(X_input[:, i])
             y = Y_input[:, i]
             loss += self.output_layer.calc_loss(y)
-        return y_hat, loss / m
+        return loss / m
 
     # def objective_loss(self):
     #     # """

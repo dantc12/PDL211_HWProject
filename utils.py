@@ -1,13 +1,18 @@
 import numpy as np
 
 
-
-# def sigmoid(x: np.ndarray) -> np.ndarray:
-#     return 1 / (1 + np.exp(-x))
+def sigmoid(x: np.ndarray) -> np.ndarray:
+    return 1 / (1 + np.exp(-x))
 
 
 def relu(x: np.ndarray) -> np.ndarray:
     return np.maximum(0, x)
+
+
+def d_relu(x: np.ndarray) -> np.ndarray:
+    x[x <= 0] = 0
+    x[x > 0] = 1
+    return x
 
 
 # def normalize_vector(x: np.ndarray) -> np.ndarray:
